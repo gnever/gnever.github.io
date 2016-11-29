@@ -7,7 +7,7 @@ date_format: "ordinal"
 title: 随记
 subtitle: "this is gao"
 description: "郜"
-keywords:gao 
+keywords: gao 
 favicon: /favicon.ico
 timezone: Asia/Shanghai
 encoding: "utf-8"
@@ -16,7 +16,7 @@ side_bar_repo_limit: 5
 # ---------------- #
 #      Author      #
 # ---------------- #
-author:xubin gao 
+author: xubin gao 
 organization: Gee.
 organization_url: https://www.hiwi.com
 location: Beijing, China
