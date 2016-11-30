@@ -1,3 +1,4 @@
+{% if null %}
 <h3>My Popular Repositories</h3>
 {% if site.github.public_repositories != null %}
 {% assign repos = site.github.public_repositories | sort: "stargazers_count" | reverse%}
@@ -31,4 +32,5 @@
     </div>
 </a>
 {% endfor %}
+{% endif %}
 {% endif %}
