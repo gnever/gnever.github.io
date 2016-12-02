@@ -74,7 +74,7 @@ http://domain.com/??js1.js,js2.js,js3.js
 http://domain.com/??style1.css,style2.css,style3.css
 ```
 
-主要功能是将静态资源文件的请求合并成一个，然后由 nginx 做分发，拉取不同的文件。通过减少 web 请求来减低服务器压力，同时减少 client 端请求建立连接的耗时
+主要功能是将静态资源文件的请求合并成一个，然后由 nginx 做分发，拉取不同的文件。通过减少 web 请求来减低服务器压力，同时减少 client 端请求建立连接的耗时 [注5]
 
 ### fis
 
@@ -101,6 +101,11 @@ http://domain.com/??style1.css,style2.css,style3.css
   * 不要将所有的 cookie 都设置在根域下，合适的位置才是最好的
 * 延迟加载。只加载必须的资源，对于某些数据和用户不可见图片等可以延迟加载
 * css 内图片压缩合并
+* 设置 DNS 预解析
+```html
+<meta http-equiv="x-dns-prefetch-control" content="on" />
+<link rel="dns-prefetch" href="https://s.histatic.com" />
+```
 * 按域名划分内容，对于 css 资源需要最快速的加载出来，所以在 css 资源不多的情况下尽量只用同一个独立域名，减少 DNS 的 解析
 * 页面内 ajax 尽量使用 GET 方式，因为 POST 请求其实是分两步的，先发送头信息，然后再发送数据.
     >POST is implemented in the browsers as a two-step process: sending the headers first, then sending data.
@@ -121,7 +126,7 @@ http://domain.com/??style1.css,style2.css,style3.css
 [注3]
 
 >浏览器对每个域名的并发链接是有限制的，使用多个独立域名，可以大大增加并发连接数，可以使流浪器并行下载更多资源，加速展示
->但是从 DNS 的角度上讲，每增加一个域名就代表着要增加一个 DNS 的解析，并且 keepalive 也不可能用在不同的域名上使用，所以还需要根据页面中加载的静态文件资源的数量和 DNS 服务商的性能权衡如何使用。
+>但是从 DNS 的角度上讲，每增加一个域名就代表着要增加一个 DNS 的解析（一般 DNS 解析的耗时在 20ms 以上），并且 keepalive 也不可能用在不同的域名上使用，所以还需要根据页面中加载的静态文件资源的数量和 DNS 服务商的性能权衡如何使用。
 
 [注4]
 
@@ -129,7 +134,13 @@ http://domain.com/??style1.css,style2.css,style3.css
 >但是如果 nginx 设置了 Cache-Control 或者 expire ，则在有效期内，浏览器打开页面之后直接使用缓存的文件，连 If-Modify 的请求都不用发。
 >但是由于 CDN 和浏览器自身的一些缓存机制，上述的两个方案不一定好用，或者要缓存的更彻底一些。
 
+[注5]
+
+>一直在强调减少 http 的请求，因为每个请求都有成本的，可以分为时间成本和资源成本。
+>一个完整的请求都需要经过 DNS 解析、与服务器建立连接、发送数据、等待服务器响应、接收数据、关闭连接。对于 https 的请求还有证书下载、数据加密、数据解密的步骤
+
 # 问题
+
 [问1]
 
 >1 服务端发送跳转后整个逻辑是怎么执行的？
@@ -138,6 +149,17 @@ http://domain.com/??style1.css,style2.css,style3.css
 header("Location: http://www.hiwifi.com/"); 
 exit;
 ```
+>3 既然说到了 header 跳转，还有一个相似的 case
+    >nginx 499 的 code
+    >这个 code 是 nginx 自定义的，产生原因是 client 主动断开了与 nginx 的连接
+    >那么问题来了，按照咱们后端的架构 client -> nginx -> phpfpm 。如果一个 client 请求 php 执行很耗时，用户等烦了直接刷新网页或者关闭了网页，那么此时 nginx 会断掉，记录为 499，但是 php-fpm 怎么处理这个请求？
+    >答案：php-fpm 不受 client 关闭影响，继续执行。
+    >那么这就产生两个问题
+        >(1) 耗时请求过多时，就算 client 端关闭了请求，但是 php-fpm 的资源也不会自动释放，直到执行结束或超时。此时 php-fpm 就很容易被打满，没有资源处理新进入的请求。
+        >(2) 如果 client 发起的是数据修改的请求，即使 client 关闭的请求，也有可能会修改成功的
+    >对于平时经常用到的业务影响就是
+        >(1) 请求修改用户信息接口，即使 curl 返回的错误 code 是 28，但是也有可能成功。计数、扣款、增加付费时长等数据敏感的接口，即使返回 28，也不一定修改失败。注意不要因为调用超时就循环请求接口，否则可能就会造成 重复扣款或重复添加付费时长。
+        >(2) php 内调用 openapi 同理
 
 [问2]
 
