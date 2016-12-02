@@ -46,13 +46,13 @@ app.hiwifi.com 站点登陆成功之后到加载完成耗时平均在 8s 左右�
 * 开启gzip压缩，expire 目前 s.hiwifi.com 、c.hiwifi.com 没有
 # 开启keepalive
 * 使用cdn  但目前国内貌似没有 https 的CDN
-* css 放在 js 前加载，保证 css 的并行下载（其中登录页js阻塞较明显。有js的渲染）[注2]
+* css 放在 js 前加载，保证 css 的并行下载（其中登录页js阻塞较明显。有js的渲染）[[注2](#node2)]
 * 代码规则：
     * css 优先放在 header 中，页面在下载完 css 之后才会再下载其他的。
     * 避免使用内嵌样式或放在 body 中，避免重绘。
     * js 除 jQuery 外全部放到 footer 中。使用 (function($) { } )(jQuery)，方便使用合并 js 功能。
     * 页面头部优先定义编码。浏览器会缓冲一定的字节数据来查找编码信息，尽量减少缓冲数据量（在预设的缓冲量还没有找到编码信息后会使用当前默认的编码，但是在加载后续中如发现编码格式跟默认不一致则又会重新渲染）。
-* php 中使用header跳转一定要写准确的url，比如不要写http://app.hiwifi.com 要用https，否则服务端会调转至https。过程就是用户发送请求，收到服务端302跳转请求后，在发送请求。[问1]
+* php 中使用header跳转一定要写准确的url，比如不要写http://app.hiwifi.com 要用https，否则服务端会调转至https。过程就是用户发送请求，收到服务端302跳转请求后，在发送请求。[[问1](#ask1)]
 
 ## 静态资源合并 
 
@@ -74,7 +74,7 @@ http://domain.com/??js1.js,js2.js,js3.js
 http://domain.com/??style1.css,style2.css,style3.css
 ```
 
-主要功能是将静态资源文件的请求合并成一个，然后由 nginx 做分发，拉取不同的文件。通过减少 web 请求来减低服务器压力，同时减少 client 端请求建立连接的耗时 [注5]
+主要功能是将静态资源文件的请求合并成一个，然后由 nginx 做分发，拉取不同的文件。通过减少 web 请求来减低服务器压力，同时减少 client 端请求建立连接的耗时 [[注5](#node5)]
 
 ### fis
 
@@ -83,10 +83,10 @@ http://domain.com/??style1.css,style2.css,style3.css
 与 concat 不同的时，该工具在代码发布时，在物理上将多个静态文件合并为一个文件，所以前端只要请求加载这一个文件即可
 
 # 实施
-* 增加 s.histatic1.com s.histatic2.com，作为 https 页面下的资源加载域名 [注3]
-* 增加 c.histatic1.com c.histatic2.com，作为 http 页面下的资源加载域名，同时增加 CDN [问2]
+* 增加 s.histatic1.com s.histatic2.com，作为 https 页面下的资源加载域名 [[注3](#node3)]
+* 增加 c.histatic1.com c.histatic2.com，作为 http 页面下的资源加载域名，同时增加 CDN [[问2](#ask2)]
 * nginx 开启 gzip
-* nginx 设置 expire [注4]
+* nginx 设置 expire [[注4](#node1)]
 * nginx 开启 keepalie
 * js/css concat
 * php 统一 header、footer 及 css/js 加载
@@ -122,19 +122,19 @@ http://domain.com/??style1.css,style2.css,style3.css
 
 所以静态文件需要使用独立的域名
 
-[注2]
+<span id="node1">[注2]</span>
 
 js 的加载会阻塞整个页面的渲染。这么设计也是很有意思的
 
 由于静态资源可以并发下载参考 [注释3] ，而 js 脚本可能会改变页面，所以需要先将整个未知部分解决掉。最终要的是 js 脚本是顺序加载的，比如某个脚本需要调用 jQuery，那么就必须等待 jQuery 加载完毕之后才能再加载自己。
 
-[注3]
+<span id="node1">[注3]</span>
 
 浏览器对每个域名的并发链接是有限制的，使用多个独立域名，可以大大增加并发连接数，可以使流浪器并行下载更多资源，加速展示
 
 但是从 DNS 的角度上讲，每增加一个域名就代表着要增加一个 DNS 的解析（一般 DNS 解析的耗时在 20ms 以上），并且 keepalive 也不可能用在不同的域名上使用，所以还需要根据页面中加载的静态文件资源的数量和 DNS 服务商的性能权衡如何使用。
 
-[注4]
+<span id="node1">[注4]</span>
 
 大家应该注意到加载静态资源会有 http 304 code 是因为浏览器缓存了目标资源但不确定该缓存资源是否是最新版本的时候,就会发送一个 If-Modified 的请求头，头信息中有文件上次修改时间和一个标识，nginx 根据这两个头信息判断是否需要更新文件。如果不需要则返回 304 ，浏览器还是使用之前下载的资源。否则返回 200 ，浏览器重新下载资源。
 
@@ -142,7 +142,7 @@ js 的加载会阻塞整个页面的渲染。这么设计也是很有意思的
 
 但是由于 CDN 和浏览器自身的一些缓存机制，上述的两个方案不一定好用，或者要缓存的更彻底一些。
 
-[注5]
+<span id="node1">[注5]</span>
 
 一直在强调减少 http 的请求，因为每个请求都有成本的，可以分为时间成本和资源成本。
 
@@ -150,7 +150,7 @@ js 的加载会阻塞整个页面的渲染。这么设计也是很有意思的
 
 # 问题
 
-[问1]
+<span id="ask1">[问1]</span>
 
 * 服务端发送跳转后整个逻辑是怎么执行的？
 
@@ -163,7 +163,7 @@ exit;
 
 既然说到了 header 跳转，还有一个相似的 case
 
-nginx 499 的 code
+>nginx 499 的 code
 
 这个 code 是 nginx 自定义的，产生原因是 client 主动断开了与 nginx 的连接
   
@@ -172,13 +172,16 @@ nginx 499 的 code
 >答案：php-fpm 不受 client 关闭影响，继续执行。
 
 那么这就产生两个问题
+ 
  * 耗时请求过多时，就算 client 端关闭了请求，但是 php-fpm 的资源也不会自动释放，直到执行结束或超时。此时 php-fpm 就很容易被打满，没有资源处理新进入的请求。
  * 如果 client 发起的是数据修改的请求，即使 client 关闭的请求，也有可能会修改成功的
 
 对于平时经常用到的业务影响就是
+ 
  * 请求修改用户信息接口，即使 curl 返回的错误 code 是 28，但是也有可能成功。计数、扣款、增加付费时长等数据敏感的接口，即使返回 28，也不一定修改失败。注意不要因为调用超时就循环请求接口，否则可能就会造成 重复扣款或重复添加付费时长。
  * php 内调用 openapi 同理
 
-[问2]
+<span id="ask2">[问2]</span>
 
 为什么要分 s.histatic.com 和 c.histatic.com ，即 为什么加载 https 和 http 的需要区分开来？
+>答案：https 的页面内，由于浏览器的安全策略，无法引入非 https 的资源文件
