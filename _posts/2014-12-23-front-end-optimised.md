@@ -102,10 +102,12 @@ http://domain.com/??style1.css,style2.css,style3.css
 * 延迟加载。只加载必须的资源，对于某些数据和用户不可见图片等可以延迟加载
 * css 内图片压缩合并
 * 设置 DNS 预解析
+
 ```html
 <meta http-equiv="x-dns-prefetch-control" content="on" />
 <link rel="dns-prefetch" href="https://s.histatic.com" />
 ```
+
 * 按域名划分内容，对于 css 资源需要最快速的加载出来，所以在 css 资源不多的情况下尽量只用同一个独立域名，减少 DNS 的 解析
 * 页面内 ajax 尽量使用 GET 方式，因为 POST 请求其实是分两步的，先发送头信息，然后再发送数据.
     >POST is implemented in the browsers as a two-step process: sending the headers first, then sending data.
