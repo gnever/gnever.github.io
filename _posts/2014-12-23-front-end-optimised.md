@@ -112,6 +112,10 @@ http://domain.com/??style1.css,style2.css,style3.css
 * 页面内 ajax 尽量使用 GET 方式，因为 POST 请求其实是分两步的，先发送头信息，然后再发送数据.
     >POST is implemented in the browsers as a two-step process: sending the headers first, then sending data.
 
+# 优化后效果
+
+>数据没有保留，但是现在看效果还可以 :-) :-)
+
 # 注
 
 <span id="node1">[注1]</span>
@@ -147,6 +151,7 @@ js 的加载会阻塞整个页面的渲染。这么设计也是很有意思的
 一直在强调减少 http 的请求，因为每个请求都有成本的，可以分为时间成本和资源成本。
 
 一个完整的请求都需要经过 DNS 解析、与服务器建立连接、发送数据、等待服务器响应、接收数据、关闭连接。对于 https 的请求还有证书下载、数据加密、数据解密的步骤
+
 
 # 问题
 
