@@ -147,6 +147,7 @@ http://domain.com/??style1.css,style2.css,style3.css
 
 >1 服务端发送跳转后整个逻辑是怎么执行的？
 >2 为什么跳转了还要加 exit
+
 ```php 
 header("Location: http://www.hiwifi.com/"); 
 exit;
