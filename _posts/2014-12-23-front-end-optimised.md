@@ -52,7 +52,7 @@ app.hiwifi.com 站点登陆成功之后到加载完成耗时平均在 8s 左右�
     * 避免使用内嵌样式或放在 body 中，避免重绘。
     * js 除 jQuery 外全部放到 footer 中。使用 (function($) { } )(jQuery)，方便使用合并 js 功能。
     * 页面头部优先定义编码。浏览器会缓冲一定的字节数据来查找编码信息，尽量减少缓冲数据量（在预设的缓冲量还没有找到编码信息后会使用当前默认的编码，但是在加载后续中如发现编码格式跟默认不一致则又会重新渲染）。
-* php 中使用header跳转一定要写准确的url，比如不要写http://app.hiwifi.com 要用https，否则服务端会调转至https。过程就是用户发送请求，收到服务端302跳转请求后，在发送请求。[[问1](#ask1)]
+* PHP 中使用header跳转一定要写准确的url，比如不要写http://app.hiwifi.com 要用https，否则服务端会调转至https。过程就是用户发送请求，收到服务端302跳转请求后，在发送请求。[[问1](#ask1)]
 
 ## 静态资源合并 
 
@@ -89,7 +89,7 @@ http://domain.com/??style1.css,style2.css,style3.css
 * nginx 设置 expire [[注4](#node1)]
 * nginx 开启 keepalie
 * js/css concat
-* php 统一 header、footer 及 css/js 加载
+* PHP 统一 header、footer 及 css/js 加载
 * 代码调整（ css/js 顺序、header 跳转 ）
 
 # 补充
@@ -172,7 +172,7 @@ exit;
 
 这个 code 是 nginx 自定义的，产生原因是 client 主动断开了与 nginx 的连接
   
-那么问题来了，按照咱们后端的架构 client -> nginx -> phpfpm 。如果一个 client 请求 php 执行很耗时，用户等烦了直接刷新网页或者关闭了网页，那么此时 nginx 会断掉，记录为 499，但是 php-fpm 怎么处理这个请求？
+那么问题来了，按照咱们后端的架构 client -> nginx -> phpfpm 。如果一个 client 请求 PHP 执行很耗时，用户等烦了直接刷新网页或者关闭了网页，那么此时 nginx 会断掉，记录为 499，但是 php-fpm 怎么处理这个请求？
 
 >答：php-fpm 不受 client 关闭影响，继续执行。
 
@@ -184,7 +184,7 @@ exit;
 对于平时经常用到的业务影响就是
  
  * 请求修改用户信息接口，即使 curl 返回的错误 code 是 28，但是也有可能成功。计数、扣款、增加付费时长等数据敏感的接口，即使返回 28，也不一定修改失败。注意不要因为调用超时就循环请求接口，否则可能就会造成 重复扣款或重复添加付费时长。
- * php 内调用 openapi 同理
+ * PHP 内调用 openapi 同理
 
 <span id="ask2">[问2]</span>
 
