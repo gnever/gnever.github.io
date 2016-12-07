@@ -118,6 +118,7 @@ $hash = password_hash($pwd, PASSWORD_DEFAULT, $options);
 // $2y$11$gJEX2bLfbI7pWIBKWkCW3ehep4eh7M7MS6BLCvg6hTZSOUOPblbEa
 
 //验证
+//此方法可以避免时序攻击
 
 if (password_verify($pwd, $hash)) {
     echo "pwd is valid\n";
@@ -298,7 +299,147 @@ array (
 )
 ```
 
+# PHP 5.6.x 新特性
+
+## ... 可变参数函数
+
+变量前使用 ... 操作符表示这个变量是可变参数，如果传入多个参数，这些参数都会被压到这个变量数组中
+
+```php
+function sum(...$arr) {
+    return array_sum($arr);
+}
+
+var_dump(sum(2, '3', 4.1,'1'));
+
+```
+
+>float(10.1)
+
+还有一个与这个方法相对应的
+
+
+```php
+
+function testUnpackSum($a, $b) {
+        return $a + $b;
+}
+
+$arr = array(2, 3);
+var_dump(testUnpackSum(...$arr));
+
+```
+
+>int(5)
 
 # PHP 7.0.x 新特性
 
+## 变量类型的声明
 
+分为 强制模式 和 严格模式
+
+强制模式
+
+```php
+function sumOfInt(int ...$arr) {
+    return array_sum($arr);
+}
+
+var_dump(sumOfInt(2, '3', 4.1,'1'));
+
+```
+> int(10)
+
+严格模式
+
+```php
+declare(strict_types=1);
+
+function sumOfInt(int ...$arr): int{
+    return array_sum($arr);
+}
+
+var_dump(sumOfInt(2, '3', 4.1,'1'));
+
+```
+
+>PHP Fatal error:  Uncaught TypeError: Argument 2 passed to sumOfInt() must be of the type integer, string given
+
+## null合并运算符
+
+用来替代之前大量使用的 三元表达式 和 isset() 。如果变量存在并且不为 null，就会返回自身的值，否则返回第二个操作数
+
+```php
+$a = 'this is a';
+
+$b = $a ?? 'nobody';
+var_dump($a);
+
+```
+
+> string(9) "this is a"
+
+
+## 组合比较符
+
+相等 为 0 
+大于 为 1
+小于 为 -1
+
+
+```php
+echo 1 <=> 1; // 0
+echo 2 <=> 1; // 1
+echo 1 <=> 2; // -1
+
+```
+
+## define 可以定义数组
+
+## 匿名类
+
+通过new class 暂时来实例化一个匿名类
+
+```php
+interface Tool {
+
+    public function get();
+
+}
+        
+$obj = new class implements Tool {
+
+    public function get() {
+        return "this is anonymous";
+    }
+};
+
+var_dump($obj->get());
+
+```
+
+> string(17) "this is anonymous"
+
+# Group use declarations
+
+同一 namespace 下的类、函数和常量可以通过 use 一次性导入
+
+
+```php
+
+use active\xxx\{ClassA, ClassB, ClassC as C};
+use function active\xxx\{fn_a, fn_b, fn_c};
+use const active\xxx\{ConstA, ConstB, ConstC};
+
+```
+
+# intdiv
+
+除法运算,获取结果的整数值，计算时会将参数全部转成整型计算
+
+```php
+var_dump(intdiv(10, 1.9));
+
+```
+
+>int(10)
