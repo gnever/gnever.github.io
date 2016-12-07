@@ -81,7 +81,7 @@ $array = [
 ];
 
 foreach ($array as list($a, $b)) {
-        echo "A: $a; B: $b\n";
+    echo "A: $a; B: $b\n";
 }
 
 ```
